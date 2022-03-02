@@ -79,3 +79,12 @@ sftp-config.json
 
 # docker
 docker/
+
+# Postgres
+postgres-data/
+pgadmin-data/
+
+
+# env
+.env
+
