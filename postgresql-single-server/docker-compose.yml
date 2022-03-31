@@ -9,29 +9,22 @@ services:
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      PGPASSWORD: ${PGPASSWORD}
-      POSTGRES_DB: example
+      POSTGRES_DB: ${POSTGRES_DB_NAME}
       TZ: ${TZ}
     ports:
-      - 25432:5432
+      - ${POSTGRES_PORT}:5432
     volumes:
       - "db_data:/var/lib/postgresql/data"
-        #- type: bind
-        #  source: "./db_data"
-        #  target: "/var/lib/postgresql/data"
   pgadmin:
     image: dpage/pgadmin4
     restart: always
     ports:
-      - 25433:80
+      - ${PGADMIN_DEFAULT_PORT}:80
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
     volumes:
       - "admin_data:/var/lib/pgadmin"
-        #- type: bind
-        #  source: "./admin_data"
-        #  target: "/var/lib/pgadmin"
     depends_on:
       - postgres
 

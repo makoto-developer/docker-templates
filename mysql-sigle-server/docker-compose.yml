@@ -1,8 +1,10 @@
 version: "3"
 services:
   db:
-    image: mysql:8.0
-    container_name: mysql_8.0
+    image: mysql:8.0.28
+    platform: linux/x86_64 # M1で必要。それ以外の場合は削除する。
+    container_name: local-mysql
+    hostname: local-mysql
     volumes:
       - ./docker/db/data:/var/lib/mysql
       - ./docker/logs:/var/log/mysql
