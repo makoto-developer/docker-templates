@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  local_postgres:
+  postgres:
     image: postgres:14.5
     restart: always
     container_name: local_postgres
@@ -15,10 +15,8 @@ services:
       - ${POSTGRES_PORT}:5432
     volumes:
       - data-psql-volume:/var/lib/postgresql/data
-    networks:
-      - container-link
 
-  local_pgadmin:
+  pgadmin:
     image: dpage/pgadmin4:6.14
     restart: always
     ports:
@@ -29,7 +27,7 @@ services:
     volumes:
       - data-admin-volume:/var/lib/pgadmin
     depends_on:
-      - local_postgres
+      - postgres
 
 volumes:
   data-psql-volume:
