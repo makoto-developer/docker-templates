@@ -32,7 +32,7 @@ dockerの中に入る
 
 ```shell
 # docker-compose exec <service name> bash      
-docker-compose exec local_postgres bash      
+docker-compose exec local_postgres bash
 ```
 
 (dockerに入った上で)データベースに接続する
