@@ -31,7 +31,23 @@ services:
     depends_on:
       - local_postgres
 
+networks:
+  default:
+    external:
+      name: bridge
+  container-link:
+    name: docker.internal
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: "172.20.100.0/24"
+
 volumes:
   data-psql-volume:
+    name: data-psql
+    driver: local
   data-admin-volume:
+    name: data-admin
+    driver: local
 
