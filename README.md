@@ -14,3 +14,8 @@ Volume削除
 docker volume rm <volume name>
 ```
 
+一括削除
+
+```shell
+docker-compose down --rmi all --volumes --remove-orphans
+```

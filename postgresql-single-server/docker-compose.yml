@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   local_postgres:
-    image: postgres:14.5
+    image: postgres:14.7
     restart: always
     container_name: local_postgres
     hostname: docker_compose_local_psql
@@ -14,10 +14,10 @@ services:
     ports:
       - ${POSTGRES_PORT}:5432
     volumes:
-      - data_psql:/var/lib/postgresql/data
+      - ./data_psql:/var/lib/postgresql/data
 
   local_psql_admin:
-    image: dpage/pgadmin4:6.14
+    image: dpage/pgadmin4:6.21
     restart: always
     container_name: local_psql_admin
     ports:
@@ -26,7 +26,7 @@ services:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
     volumes:
-      - data_admin:/var/lib/pgadmin
+      - ./data_admin:/var/lib/pgadmin
     depends_on:
       - local_postgres
 
