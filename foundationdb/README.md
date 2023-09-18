@@ -3,7 +3,7 @@
 
 ## コマンドラインで動作確認
 
-docker-compose exec fdb-coordinator bash
+docker compose exec fdb-coordinator bash
 
 ```shell
 [root@7a9d04bbc067 /]# fdbcli

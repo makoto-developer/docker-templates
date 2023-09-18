@@ -23,7 +23,7 @@ limactl start docker
 PostgreSQLコンテナを立ち上げる
 
 ```shell
-docker-compose up -d
+docker compose up -d
 ```
 
 ## Postgresql 作業
@@ -31,8 +31,8 @@ docker-compose up -d
 dockerの中に入る
 
 ```shell
-# docker-compose exec <service name> bash      
-docker-compose exec local_postgres bash
+# docker compose exec <service name> bash      
+docker compose exec local_postgres bash
 ```
 
 (dockerに入った上で)データベースに接続する

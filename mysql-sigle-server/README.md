@@ -23,5 +23,5 @@ limactl start docker
 MySQLコンテナを立ち上げる
 
 ```shell
-docker-compose up -d
+docker compose up -d
 ```
