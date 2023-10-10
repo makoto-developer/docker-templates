@@ -17,6 +17,18 @@ start docker compose server
 docker compose up
 ```
 
+## Access DynamoDB Local
+
+command line
+
+```shell
+aws dynamodb list-tables --endpoint-url http://localhost:8000
+```
+
+programming languages
+
+refer to aws sdk package by your language.
+
 
 ## Reference
 - https://docs.aws.amazon.com/ja_jp/amazondynamodb/latest/developerguide/DynamoDBLocal.DownloadingAndRunning.html
