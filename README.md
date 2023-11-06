@@ -19,3 +19,9 @@ docker volume rm <volume name>
 ```shell
 docker compose down --rmi all --volumes --remove-orphans
 ```
+
+コンテナのIPを調べる
+
+```shell
+docker container exec -it <<container name>> hostname -i
+```
