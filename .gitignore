@@ -88,3 +88,6 @@ pgadmin-data/
 # env
 .env
 
+# swap
+*.swp
+
