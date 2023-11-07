@@ -19,15 +19,17 @@ docker compose up
 
 ## Access DynamoDB Local
 
-command line
+command line(change port if edit .env and change dynamodb port.
 
 ```shell
-aws dynamodb list-tables --endpoint-url http://localhost:8000
+aws dynamodb list-tables --endpoint-url http://localhost:47000
 ```
 
 programming languages
 
+```text
 refer to aws sdk package by your language.
+```
 
 
 ## Reference

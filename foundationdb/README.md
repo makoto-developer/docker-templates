@@ -1,5 +1,14 @@
+# FoundationDB
 
-# foundationdb使い方メモ
+## Feature
+
+|key|value|
+|:---:|:---|
+|_|チュートリアルで実行したコマンドを使い方に載せる|
+|_|Goのサンプルコードを作る|
+|_||
+|_||
+|_||
 
 ## コマンドラインで動作確認
 
@@ -66,8 +75,6 @@ Client time: 07/14/23 12:37:59
 configure new triple ssd
 writemode on
 set shop_name "seven-eleven"
-
-
 ```
 
 取得
@@ -77,3 +84,4 @@ set shop_name "seven-eleven"
 削除
 ```shell
 ```
+

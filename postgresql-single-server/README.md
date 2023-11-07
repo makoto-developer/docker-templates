@@ -2,22 +2,16 @@
 
 ## 導入手順
 
-1. .envを作成してください
+`.env`を作成
 
 ```shell
-# 雛形をコピーして作成
 cp .env.example .env
-
-# コピーしたら.envファイルを開き、シークレット情報を更新する(パスワードは複雑なものに更新すること!)
-vi .env
 ```
 
-2. 立ち上げる
-
-limaを使っていて、dockerが動いていない場合は↓のコマンドを実行する
+ポート番号やPSQLの情報を編集
 
 ```shell
-limactl start docker
+vi .env
 ```
 
 PostgreSQLコンテナを立ち上げる
@@ -31,8 +25,7 @@ docker compose up -d
 dockerの中に入る
 
 ```shell
-# docker compose exec <service name> bash      
-docker compose exec local_postgres bash
+docker compose exec <service name> bash      
 ```
 
 (dockerに入った上で)データベースに接続する
@@ -169,3 +162,4 @@ pg_dumpall -h localhost -p 5432 -U postgres --exclude-database postgres | sed -E
 ## References
 - https://mebee.info/2020/12/04/post-24686/
 - https://zenn.dev/sarisia/articles/0c1db052d09921
+

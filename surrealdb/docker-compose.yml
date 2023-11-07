@@ -3,8 +3,8 @@ version: '3.8'
 services:
   surrealdb:
     image: surrealdb/surrealdb:nightly
-    container_name: surrealdb
-    hostname: docker_compose_surrealdb
+    container_name: ${SERVER_NAME}
+    hostname: docker_${SERVER_NAME}
     restart: always
     command: start --user INSERT_USERNAME_HERE --pass INSERT_PASSWORD_HERE file:/data/database.db
     ports:

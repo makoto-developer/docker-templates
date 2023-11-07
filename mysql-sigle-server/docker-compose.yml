@@ -2,13 +2,13 @@ version: "3.8"
 services:
   db:
     image: mysql:8.0.30
-    platform: linux/x86_64 # M1で必要。それ以外の場合は削除する。
-    container_name: local_mysql
-    hostname: docker_compose_local_mysql
+    platform: linux/x86_64
+    container_name: ${DB_SERVER_NAME}
+    hostname: docker_${DB_SERVER_NAME}
     volumes:
-      - ./docker/db/data:/var/lib/mysql
-      - ./docker/logs:/var/log/mysql
-      - ./docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
+      - ./mysql_data/db/data:/var/lib/mysql
+      - ./mysql_data/logs:/var/log/mysql
+      - ./mysql_data/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
     environment:
       - MYSQL_DATABASE=${DB_NAME}
       - MYSQL_USER=${DB_USER}
