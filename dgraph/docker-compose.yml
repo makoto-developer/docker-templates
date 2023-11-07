@@ -10,7 +10,7 @@ services:
     restart: on-failure
     command: dgraph zero --my=zero:${DGRAPH_PORT_GRPC}
   alpha:
-    image: dgraph/dgraph:${DGRAPH_VERSION}
+    image: dgraph/dgraph:v23.1.0
     volumes:
       - /tmp/data:/dgraph
     ports:
