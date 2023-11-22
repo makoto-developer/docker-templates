@@ -12,7 +12,6 @@ cp .env.example .env
 
 start docker compose server
 
-
 ```shell
 docker compose up
 ```
@@ -30,6 +29,10 @@ programming languages
 ```text
 refer to aws sdk package by your language.
 ```
+
+## NoSQL Workbench(GUI)
+
+https://docs.aws.amazon.com/ja_jp/amazondynamodb/latest/developerguide/workbench.settingup.html
 
 
 ## Reference
