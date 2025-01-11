@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   local_postgres:
-    image: postgres:14.9
+    image: postgres:17.2
     restart: always
     container_name: ${SERVER_NAME}
     hostname: docker_${SERVER_NAME}
@@ -17,7 +17,7 @@ services:
       - data_psql:/var/lib/postgresql/data
 
   local_postgres_admin:
-    image: dpage/pgadmin4:6.21
+    image: dpage/pgadmin4:8.14.0
     restart: always
     container_name:  ${SERVER_NAME}_admin
     hostname: docker_${SERVER_NAME}_admin

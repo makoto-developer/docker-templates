@@ -20,6 +20,26 @@ PostgreSQLコンテナを立ち上げる
 docker compose up -d
 ```
 
+## 起動、停止
+
+起動
+
+```shell
+docker compose start
+```
+
+停止
+
+```shell
+docker compose start
+```
+
+Composeを削除
+
+```shell
+docker compose down
+```
+
 ## Postgresql 作業
 
 dockerの中に入る
