@@ -52,18 +52,56 @@ docker compose exec <service name> bash
 
 ```shell
 psql -U postgres -d app_dev
+sudo -u postgres psql
 ```
 
-データベースから出る
+スキーマのリスト
 
 ```postgresql
-\q
+\dn
+```
+
+スキーマの作成
+
+```postgresql
+create schema <<schema_name>>;
+```
+
+現在のスキーマ
+
+```postgresql
+select current_schema();
+```
+
+スキーマを切り替える
+
+```postgresql
+SET search_path = <<schema_name>>;
+```
+
+スキーマ名を変更
+
+```postgresql
+ALTER SCHEMA <<before_scheama_name>> RENAME TO <<new_schema_name>>;
 ```
 
 データベース一覧
 
 ```postgresql
-psql -l
+\l
+```
+
+データベースを作成する
+
+```psql
+create database <<database_name>>;
+```
+
+
+現在のデータベース
+
+```psql
+select current_database();
 ```
 
 データベース切り替え
@@ -72,10 +110,22 @@ psql -l
 \c <db name>
 ```
 
+データベースから出る
+
+```postgresql
+\q
+```
+
+データベース名を変更
+
+```postgresql
+ALTER DATABASE <<before_name>> RENAME TO <<after_name>>
+```
+
 テーブル一覧
 
 ```postgresql
-\t
+\dt
 ```
 
 テーブルのスキーマ詳細
