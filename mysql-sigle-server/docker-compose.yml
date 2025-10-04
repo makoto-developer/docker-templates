@@ -1,8 +1,10 @@
-version: "3.8"
+# MySQLのDocker Image
+# .envファイルを作成してdocker compose up -dで起動してください。
 services:
   db:
-    image: mysql:8.0.30
-    platform: linux/x86_64
+    image: mysql:9.4
+    # M1以降のPCはこれを有効にしてください
+    #platform: linux/x86_64
     container_name: ${DB_SERVER_NAME}
     hostname: docker_${DB_SERVER_NAME}
     volumes:
@@ -10,10 +12,10 @@ services:
       - ./mysql_data/logs:/var/log/mysql
       - ./mysql_data/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
     environment:
-      - MYSQL_DATABASE=${DB_NAME}
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
       - MYSQL_USER=${DB_USER}
       - MYSQL_PASSWORD=${DB_PASS}
-      - MYSQL_ROOT_PASSWORD=${DB_PASS}
+      - MYSQL_DATABASE=${DB_NAME}
       - TZ=${TZ}
     ports:
       - ${DB_PORT}:3306
