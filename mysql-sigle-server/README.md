@@ -43,6 +43,12 @@ mysql -uroot -p
 create database test_db;
 ```
 
+データベースを削除
+
+```mysql
+DROP DATABASE [database];
+```
+
 データベースに入る(スイッチ)
 
 ```mysql
@@ -170,6 +176,12 @@ create user `testuser`@`localhost` IDENTIFIED BY 'password';
 grant all privileges on test_db.* to testuser@localhost IDENTIFIED BY 'password';
 ```
 
+ユーザの権限を確認
+
+```mysql
+SHOW GRANTS FOR 'ユーザ名'@'ホスト名';
+```
+
 ログイン中のユーザーのパスワードを設定
 
 ```mysql
@@ -211,6 +223,20 @@ mysqldump -u [ユーザー名] -p -x test_db users --where="id < 5" > [出力フ
 ```mysql
 mysql -u[ユーザー名] -p new_db < [ダンプファイル名]
 ```
+
+実行結果を出力する方法2
+
+```mysql
+SELECT * FROM [テーブル名] INTO OUTFILE '[出力先ファイルパス]';
+```
+
+出力したダンプからテーブルを生成
+
+```mysql
+LOAD DATA INFILE '[入力元ファイル名]' INTO TABLE [テーブル名];
+```
+
+
 
 ## 便利技集
 
