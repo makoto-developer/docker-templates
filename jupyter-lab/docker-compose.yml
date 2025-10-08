@@ -1,0 +1,11 @@
+services:
+  notebook:
+    image: jupyter/base-notebook:x86_64-notebook-7.0.6
+    command:
+      - start-notebook.sh
+      - --NotebookApp.token='' # 認証を無効化
+      - --NotebookApp.disable_check_xsrf=True # CSRFチェックを無効化
+    ports:
+      - 8888:8888
+    volumes:
+      - ./notebook:/home/jovyan/work

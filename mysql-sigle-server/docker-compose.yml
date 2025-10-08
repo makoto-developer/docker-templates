@@ -1,5 +1,3 @@
-# MySQLのDocker Image
-# .envファイルを作成してdocker compose up -dで起動してください。
 services:
   db:
     image: mysql:8.4
