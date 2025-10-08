@@ -1,5 +1,11 @@
 # Dgraph
 
+- ネイティブGraphQLデータベース
+- 水平方向にスケーラブルな分散型データベース
+- ACIDトランザクション
+- 一貫性のあるレプリケーション
+- 線形化可能な読み取り
+
 ## Starting
 
 Create .env file, and edit dgraph docker container ports.
