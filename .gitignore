@@ -91,3 +91,4 @@ pgadmin-data/
 # swap
 *.swp
 
+.idea/
