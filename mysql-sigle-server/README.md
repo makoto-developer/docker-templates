@@ -192,6 +192,7 @@ SELECT @cities;
 
 ##  管理者作業
 
+ユーザ管理
 
 ```sql
 -- ユーザー一覧
@@ -211,7 +212,11 @@ SET PASSWORD = PASSWORD('new_mysql_password');
 
 -- 特定のユーザのパスワードを設定
 SET PASSWORD FOR 'testuser'@'localhost' = PASSWORD('hogehoge123');
+```
 
+バックアップ
+
+```sql
 -- 全てのデータベースからダンプを取得
 mysqldump -u [ユーザー名] -p -x --all-databases > [出力ファイル名]
 

@@ -12,7 +12,7 @@ services:
     ports:
       - ${POSTGRES_PORT}:5432
     volumes:
-      - data_psql18:/var/lib/postgresql/data
+      - ./data_psql:/var/lib/postgresql/data
 
 volumes:
   data_psql18:
