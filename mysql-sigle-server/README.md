@@ -42,6 +42,7 @@ MySQLから脱出
 
 ## 基本技
 
+公式サイトを見るのが一番正解 -> https://dev.mysql.com/doc/refman/8.4/en/sql-statements.html
 
 データベース操作
 
@@ -102,6 +103,13 @@ ALTER TABLE users ADD tel int DEFAULT NULL COMMENT "電話番号"  AFTER mail_ad
 インデクス操作
 
 ```sql
+-- インデクス作成
+CREATE INDEX part_of_name ON customer (name(10));
+```
+
+Viewを作成
+```shell
+CREATE VIEW v_today (today) AS SELECT CURRENT_DATE;
 ```
 
 データをいじる
@@ -122,6 +130,64 @@ COMMIT;
 
 -- 取り消したい時は
 ROLLBACK;
+```
+
+プロシージャ(よく使うSQL処理を「関数」のように名前を付けて保存できる)
+
+公式サイトの説明から実際のテーブルとデータを作ってみる -> https://dev.mysql.com/doc/refman/8.4/en/create-procedure.html
+
+```sql
+
+-- データベースの作成
+CREATE DATABASE IF NOT EXISTS world;
+USE world;
+
+-- city テーブルの作成
+CREATE TABLE IF NOT EXISTS city (
+    ID INT AUTO_INCREMENT PRIMARY KEY,
+    Name VARCHAR(35) NOT NULL,
+    CountryCode CHAR(3) NOT NULL,
+    District VARCHAR(50) NOT NULL,
+    Population INT NOT NULL
+);
+
+-- サンプルデータの挿入
+INSERT INTO city (Name, CountryCode, District, Population) VALUES
+('Tokyo', 'JPN', 'Tokyo-to', 7980230),
+('Yokohama', 'JPN', 'Kanagawa', 3339594),
+('Osaka', 'JPN', 'Osaka', 2595674),
+('Nagoya', 'JPN', 'Aichi', 2154376),
+('Sapporo', 'JPN', 'Hokkaido', 1790886),
+('Kobe', 'JPN', 'Hyogo', 1425139),
+('Kyoto', 'JPN', 'Kyoto', 1461974),
+('Fukuoka', 'JPN', 'Fukuoka', 1308379),
+('New York', 'USA', 'New York', 8008278),
+('Los Angeles', 'USA', 'California', 3694820),
+('Chicago', 'USA', 'Illinois', 2896016),
+('Houston', 'USA', 'Texas', 1953631),
+('Philadelphia', 'USA', 'Pennsylvania', 1517550),
+('London', 'GBR', 'England', 7285000),
+('Birmingham', 'GBR', 'England', 970892),
+('Liverpool', 'GBR', 'England', 468945),
+('Paris', 'FRA', 'Île-de-France', 2125246),
+('Marseille', 'FRA', 'Provence-Alpes-Côte d''Azur', 798430),
+('Lyon', 'FRA', 'Rhône-Alpes', 445452);
+
+-- ストアドプロシージャの作成例
+DELIMITER //
+
+CREATE PROCEDURE citycount (IN country CHAR(3), OUT cities INT)
+BEGIN
+    SELECT COUNT(*) INTO cities
+    FROM city
+    WHERE CountryCode = country;
+END //
+
+DELIMITER ;
+
+-- ストアドプロシージャの使用例(日本の都市の数を調べる)
+CALL citycount('JPN', @cities);
+SELECT @cities;
 ```
 
 ##  管理者作業
