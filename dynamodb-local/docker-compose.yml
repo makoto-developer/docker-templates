@@ -1,13 +1,22 @@
-version: '3.8'
 services:
- dynamodb-local:
-   image: amazon/dynamodb-local:2.1.0
-   container_name: dynamodb-local
-   hostname: ${DYNAMODB_LOCAL_HOST}
-   ports:
-     - ${DYNAMODB_PORT}:8000
-   command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ./data"
-   volumes:
-     - ./dynamodb:/home/dynamodblocal/data
-   working_dir: /home/dynamodblocal
-
+  dynamodb-local:
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ./data"
+    image: "amazon/dynamodb-local:3.1.0"
+    container_name: dynamodb-local
+    ports:
+      - "7900:8000"
+    volumes:
+      - "./docker/dynamodb:/home/dynamodblocal/data"
+    working_dir: /home/dynamodblocal
+  app-node:
+    depends_on:
+      - dynamodb-local
+    image: amazon/aws-cli:2.31.10
+    container_name: app-node
+    ports:
+      - "7901:8080"
+    environment:
+      AWS_ACCESS_KEY_ID: 'DUMMYIDEXAMPLE'
+      AWS_SECRET_ACCESS_KEY: 'DUMMYEXAMPLEKEY'
+    command:
+      dynamodb describe-limits --endpoint-url http://dynamodb-local:7900 --region us-west-2

@@ -16,6 +16,24 @@ start docker compose server
 docker compose up
 ```
 
+## 
+
+```shell
+mkdir  ~/.aws
+vi  ~/.aws/credentials
+-----
+[default]
+aws_access_key_id = DUMMYIDEXAMPLE # ここの値はAWS_ACCESS_KEY_IDを参照
+aws_secret_access_key = DUMMYEXAMPLEKE # AWS_SECRET_ACCESS_KEYを参照
+-----
+vi ~/.aws/config
+-----
+[default]
+region = us-west-2
+endpoint_url = http://localhost:8000
+-----
+```
+
 ## Access DynamoDB Local
 
 command line(change port if edit .env and change dynamodb port.
