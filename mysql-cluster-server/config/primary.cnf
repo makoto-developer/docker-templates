@@ -1,0 +1,116 @@
+[mysqld]
+# サーバーID設定
+server-id = 1
+
+# レプリケーション設定
+log-bin = mysql-bin
+binlog_format = ROW
+binlog_expire_logs_seconds = 604800
+max_binlog_size = 1G
+sync_binlog = 1
+binlog_cache_size = 32K
+
+# GTID設定
+gtid-mode = ON
+enforce-gtid-consistency = ON
+
+# キャラクターセット
+character-set-server = utf8mb4
+collation-server = utf8mb4_unicode_ci
+
+# 接続設定
+max_connections = 500
+max_connect_errors = 100000
+wait_timeout = 28800
+interactive_timeout = 28800
+connect_timeout = 10
+
+# バッファ・キャッシュ設定
+innodb_buffer_pool_size = 2G
+innodb_buffer_pool_instances = 4
+innodb_log_file_size = 512M
+innodb_log_buffer_size = 64M
+innodb_flush_log_at_trx_commit = 1
+innodb_flush_method = O_DIRECT
+
+# クエリキャッシュ（MySQL 8.0では削除されたので無効）
+# query_cache_size = 0
+# query_cache_type = 0
+
+# テーブルキャッシュ
+table_open_cache = 4000
+table_definition_cache = 2000
+
+# 一時テーブル
+tmp_table_size = 128M
+max_heap_table_size = 128M
+
+# スレッド設定
+thread_cache_size = 100
+thread_stack = 512K
+
+# ソート・結合バッファ
+sort_buffer_size = 2M
+read_buffer_size = 2M
+read_rnd_buffer_size = 4M
+join_buffer_size = 4M
+
+# MyISAM設定
+key_buffer_size = 128M
+myisam_sort_buffer_size = 64M
+
+# ロギング設定
+log_error = /var/log/mysql/error.log
+slow_query_log = 1
+slow_query_log_file = /var/log/mysql/slow-query.log
+long_query_time = 2
+log_queries_not_using_indexes = 0
+log_slow_admin_statements = 1
+log_slow_slave_statements = 1
+
+# 一般クエリログ（本番では通常無効）
+general_log = 0
+general_log_file = /var/log/mysql/general.log
+
+# パフォーマンススキーマ
+performance_schema = ON
+performance_schema_max_table_instances = 4000
+
+# InnoDB設定
+innodb_file_per_table = 1
+innodb_flush_neighbors = 0
+innodb_io_capacity = 2000
+innodb_io_capacity_max = 4000
+innodb_read_io_threads = 8
+innodb_write_io_threads = 8
+innodb_thread_concurrency = 0
+innodb_lock_wait_timeout = 50
+innodb_rollback_on_timeout = 1
+innodb_autoinc_lock_mode = 2
+
+# セキュリティ設定
+local_infile = 0
+symbolic-links = 0
+skip_name_resolve = 1
+
+# トランザクション設定
+transaction_isolation = READ-COMMITTED
+
+# バイナリログセーフティ
+sql_mode = STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION
+
+# タイムゾーン
+default_time_zone = '+09:00'
+
+# その他
+max_allowed_packet = 256M
+group_concat_max_len = 4096
+lower_case_table_names = 0
+
+[client]
+port = 3306
+socket = /var/run/mysqld/mysqld.sock
+default-character-set = utf8mb4
+
+[mysql]
+default-character-set = utf8mb4

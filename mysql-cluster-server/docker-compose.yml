@@ -1,0 +1,109 @@
+version: '3.8'
+
+services:
+  # プライマリ（マスター）サーバー
+  mysql-primary:
+    image: mysql:8.0
+    container_name: mysql-primary
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-ChangeThisRootPassword123!}
+      MYSQL_DATABASE: world
+      MYSQL_USER: appuser
+      MYSQL_PASSWORD: ${MYSQL_APP_PASSWORD:-ChangeThisAppPassword123!}
+      MYSQL_REPLICATION_USER: repl_user
+      MYSQL_REPLICATION_PASSWORD: ${MYSQL_REPL_PASSWORD:-ChangeThisReplPassword123!}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-primary-data:/var/lib/mysql
+      - ./config/primary.cnf:/etc/mysql/conf.d/custom.cnf:ro
+      - ./init-primary.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./logs/primary:/var/log/mysql
+    networks:
+      - mysql-cluster
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${MYSQL_ROOT_PASSWORD:-ChangeThisRootPassword123!}"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # レプリカサーバー 1
+  mysql-replica1:
+    image: mysql:8.0
+    container_name: mysql-replica1
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: world
+    command:
+      - --server-id=2
+      - --log-bin=mysql-bin
+      - --relay-log=relay-bin
+      - --read-only=1
+      - --gtid-mode=ON
+      - --enforce-gtid-consistency=ON
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql-replica1-data:/var/lib/mysql
+      - ./init-replica.sh:/docker-entrypoint-initdb.d/init-replica.sh
+    depends_on:
+      - mysql-primary
+    networks:
+      - mysql-cluster
+
+  # レプリカサーバー 2
+  mysql-replica2:
+    image: mysql:8.0
+    container_name: mysql-replica2
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: world
+    command:
+      - --server-id=3
+      - --log-bin=mysql-bin
+      - --relay-log=relay-bin
+      - --read-only=1
+      - --gtid-mode=ON
+      - --enforce-gtid-consistency=ON
+    ports:
+      - "3308:3306"
+    volumes:
+      - mysql-replica2-data:/var/lib/mysql
+      - ./init-replica.sh:/docker-entrypoint-initdb.d/init-replica.sh
+    depends_on:
+      - mysql-primary
+    networks:
+      - mysql-cluster
+
+  # ProxySQL（オプション：負荷分散用）
+  proxysql:
+    image: proxysql/proxysql:latest
+    container_name: proxysql
+    restart: unless-stopped
+    ports:
+      - "6033:6033"
+      - "6032:6032"
+    volumes:
+      - ./proxysql.cnf:/etc/proxysql.cnf
+    depends_on:
+      - mysql-primary
+      - mysql-replica1
+      - mysql-replica2
+    networks:
+      - mysql-cluster
+
+volumes:
+  mysql-primary-data:
+  mysql-replica1-data:
+  mysql-replica2-data:
+
+networks:
+  mysql-cluster:
+    driver: bridge
