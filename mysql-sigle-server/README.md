@@ -4,7 +4,7 @@ MySQL9対応
 
 ## 導入手順
 
-`.env`を作成
+# `.env`を作成
 
 ```shell
 cp .env.example .env
@@ -34,29 +34,42 @@ MySQLにログイン
 mysql -uroot -p
 ```
 
+MySQLから脱出
+
+```shell
+\q
+```
+
 ## 基本技
+
+
+データベース操作
 
 ```sql
 -- データベースを作成
-create database test_db;
+CREATE DATABASE test_db;
 
 -- データベースを削除
 DROP DATABASE [database];
 
 -- データベースに入る(切り替える)
-use test_db;
+USE test_db;
 
 -- データベース一覧
-show databases;
+SHOW DATABASES;
+```
 
+テーブル操作
+
+```sql
 -- テーブル一覧
-show tables;
+SHOW TABLES;
 
 -- より詳しい情報を知りたい場合はこちら
-show table status;
+SHOW TABLE STATUS;
 
 -- テーブルのDDLを確認
-desc table_name
+DESC table_name
 
 -- もっと詳しく
 SHOW FULL COLUMNS FROM table_name;
@@ -84,7 +97,16 @@ ALTER TABLE [旧テーブル名] RENAME [新テーブル名]
 ALTER TABLE users ADD tel int DEFAULT NULL COMMENT "電話番号"  AFTER mail_address
 
 テーブルを変更(カラムを削除)
+```
 
+インデクス操作
+
+```sql
+```
+
+データをいじる
+
+```sql
 -- レコードを追加
 INSERT INTO table_name [フィールド名] VALUES [値]
 
@@ -100,34 +122,29 @@ COMMIT;
 
 -- 取り消したい時は
 ROLLBACK;
-
 ```
 
 ##  管理者作業
 
 
 ```sql
--- データベースからログアウト
-\q
-## 管理者作業
-
 -- ユーザー一覧
 SELECT Host, User, Password FROM mysql.user;
 
 -- ユーザーの追加
-create user `testuser`@`localhost` IDENTIFIED BY 'password';
+CREATE USER `Testuser`@`localhost` IDENTIFIED BY 'password';
 
 -- ユーザーにDB操作権限を付与
-grant all privileges on test_db.* to testuser@localhost IDENTIFIED BY 'password';
+GRANT ALL PRIVILEGES ON test_db.* TO testuser@localhost IDENTIFIED BY 'password';
 
 -- ユーザの権限を確認
 SHOW GRANTS FOR 'ユーザ名'@'ホスト名';
 
 -- ログイン中のユーザーのパスワードを設定
-set password = password('new_mysql_password');
+SET PASSWORD = PASSWORD('new_mysql_password');
 
 -- 特定のユーザのパスワードを設定
-set password for 'testuser'@'localhost' = password('hogehoge123');
+SET PASSWORD FOR 'testuser'@'localhost' = PASSWORD('hogehoge123');
 
 -- 全てのデータベースからダンプを取得
 mysqldump -u [ユーザー名] -p -x --all-databases > [出力ファイル名]
