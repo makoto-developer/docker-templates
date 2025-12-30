@@ -1,3 +1,9 @@
-data_admin
-data_psql
+# Environment variables
 .env
+
+# PostgreSQL data directories
+data/
+
+# Legacy directories (for backward compatibility)
+data_admin/
+data_psql/

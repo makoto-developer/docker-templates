@@ -92,3 +92,7 @@ pgadmin-data/
 *.swp
 
 .idea/
+
+# ai
+.serena
+.claude

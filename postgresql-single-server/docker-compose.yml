@@ -1,19 +1,88 @@
 services:
   local_postgres:
     image: postgres:18-alpine
-    restart: always
+    restart: unless-stopped
     container_name: ${SERVER_NAME}
     hostname: docker_${SERVER_NAME}
+
+    # Environment variables
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB_NAME}
       TZ: ${TZ}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --locale=C --auth-host=scram-sha-256"
+
+    # Port mapping
     ports:
       - ${POSTGRES_PORT}:5432
+
+    # Volume mounts for data persistence
     volumes:
-      - data_psql18:/var/lib/postgresql/data
+      # Database data (persistent, Docker-managed named volume)
+      - postgres_data:/var/lib/postgresql/data
 
+      # Initialization scripts (read-only)
+      - ./init:/docker-entrypoint-initdb.d:ro
+
+      # Temporary files (tmpfs for performance)
+      - postgres_tmp:/tmp
+      - postgres_run:/var/run/postgresql
+
+    # Shared memory size (important for PostgreSQL performance)
+    shm_size: 256mb
+
+    # Health check
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+    # Networks
+    networks:
+      - postgres_network
+
+# Named volumes
 volumes:
-  data_psql18:
+  # PostgreSQL data (Docker-managed persistent volume)
+  postgres_data:
+    driver: local
 
+  # Temporary file systems (tmpfs for performance)
+  postgres_tmp:
+    driver: local
+    driver_opts:
+      type: tmpfs
+      device: tmpfs
+  postgres_run:
+    driver: local
+    driver_opts:
+      type: tmpfs
+      device: tmpfs
+
+# Custom network
+networks:
+  postgres_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16

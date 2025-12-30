@@ -1,48 +1,43 @@
--- 思いつきで作ったテーブルなので参考程度に。
-create database myshop
+-- 思いつきで作ったテーブルなので参考程度に
+CREATE DATABASE myshop
 
 
-create schema online_shop;
+CREATE SCHEMA online_shop;
 
 
-create table "order"
+CREATE TABLE "order"
 (
-    id                  bigserial
+    id                  BIGSERIAL
         constraint order_pk
             primary key,
-    order_item_group_id bigserial,
-    user_id             bigserial,
-    amount              bigserial,
-    amount_without_tax  bigserial,
-    tax                 bigserial
+    order_item_group_id BIGSERIAL,
+    user_id             BIGSERIAL,
+    amount              BIGSERIAL,
+    amount_without_tax  BIGSERIAL,
+    tax                 BIGSERIAL,
+    tax_rate            NUMERIC
 );
 
-comment on table "order" is '注文履歴';
+-- テーブル・カラムへのコメント設定
+COMMENT ON TABLE "order" IS '注文履歴';
+COMMENT ON COLUMN "order".order_item_group_id IS '商品IDのリスト';
+COMMENT ON COLUMN "order".user_id IS 'ユーザID';
+COMMENT ON COLUMN "order".amount IS '税込価格(商品価格の合計)';
+COMMENT ON COLUMN "order".amount_without_tax IS '税抜価格(税抜の商品価格の合計)';
+COMMENT ON COLUMN "order".tax IS '消費税(商品価格に対する税の合計)';
+COMMENT ON COLUMN "order".tax_rate IS '消費税率';
 
-comment on column "order".order_item_group_id is '商品IDのリスト';
+CREATE INDEX order_user_id_index
+    ON "order" (user_id);
 
-comment on column "order".user_id is 'ユーザID';
+CREATE INDEX order_order_item_group_id_index
+    ON "order" (order_item_group_id);
 
-comment on column "order".amount is '税込価格(商品価格の合計)';
+CREATE INDEX order_user_id_order_item_group_id_index
+    ON "order" (user_id, order_item_group_id);
 
-comment on column "order".amount_without_tax is '税抜価格(税抜の商品価格の合計)';
-
-comment on column "order".tax is '消費税(商品価格に対する税の合計)';
-
-alter table "order"
-    owner to "FJIO8880awz0";
-
-create index order_user_id_index
-    on "order" (user_id);
-
-create index order_order_item_group_id_index
-    on "order" (order_item_group_id);
-
-create index order_user_id_order_item_group_id_index
-    on "order" (user_id, order_item_group_id);
-
-create index order_user_id_id_index
-    on "order" (user_id, id);
+CREATE INDEX order_user_id_id_index
+    ON "order" (user_id, id);
 
 
 
