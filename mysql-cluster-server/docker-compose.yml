@@ -38,7 +38,7 @@ services:
     container_name: mysql-replica1
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-ChangeThisRootPassword123!}
       MYSQL_DATABASE: world
     command:
       - --server-id=2
@@ -63,7 +63,7 @@ services:
     container_name: mysql-replica2
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-ChangeThisRootPassword123!}
       MYSQL_DATABASE: world
     command:
       - --server-id=3

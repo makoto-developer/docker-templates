@@ -4,7 +4,7 @@ services:
     environment:
       POSTGRES_DB: keycloak
       POSTGRES_USER: keycloak
-      POSTGRES_PASSWORD: password
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
     volumes:
       - postgres-data:/var/lib/postgresql/data
     networks:
@@ -16,10 +16,10 @@ services:
       KEYCLOAK_DB_VENDOR: POSTGRES
       KEYCLOAK_DB_URL: jdbc:postgresql://db:5432/keycloak
       KEYCLOAK_DB_USERNAME: keycloak
-      KEYCLOAK_DB_PASSWORD: password
+      KEYCLOAK_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD:?KEYCLOAK_DB_PASSWORD is required}
       KEYCLOAK_HTTP_PORT: 8080
       KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: adminpassword
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:?KEYCLOAK_ADMIN_PASSWORD is required}
     ports:
       - "11000:8080"
     depends_on:
