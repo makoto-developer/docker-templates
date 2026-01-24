@@ -1,2 +1,5 @@
-db_data
-admin_data
+.env
+nginx/
+init-db/
+logs/
+*.log

@@ -1,53 +1,201 @@
 version: '3.8'
 
+# =============================================================================
+# Docker Network 設定見本
+# =============================================================================
+# このファイルはDockerネットワークの様々な設定パターンを示すサンプルです。
+# 用途に応じて必要な部分をコピーして使用してください。
+# =============================================================================
+
 services:
-  local_postgres:
-    image: postgres:14.5
-    restart: always
-    container_name: local_postgres
-    hostname: docker_compose_local_psql
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB_NAME}
-      TZ: ${TZ}
+  # ---------------------------------------------------------------------------
+  # フロントエンド（frontend-netとbackend-net両方に接続）
+  # ---------------------------------------------------------------------------
+  frontend:
+    image: nginx:alpine
+    container_name: frontend
     ports:
-      - ${POSTGRES_PORT}:5432
+      - "${FRONTEND_PORT:-8080}:80"
     volumes:
-      - data-psql-volume:/var/lib/postgresql/data
+      - ./nginx/html:/usr/share/nginx/html:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
     networks:
-      - container-link
-
-  local_pgadmin:
-    image: dpage/pgadmin4:6.14
-    restart: always
-    ports:
-      - ${PGADMIN_DEFAULT_PORT}:80
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
-    volumes:
-      - data-admin-volume:/var/lib/pgadmin
+      frontend-net:
+        aliases:
+          - web
+          - nginx
+      backend-net:
+        aliases:
+          - frontend-internal
     depends_on:
-      - local_postgres
+      - api
+    restart: unless-stopped
 
+  # ---------------------------------------------------------------------------
+  # APIサーバー（backend-netのみ - フロントエンド経由でのみアクセス可能）
+  # ---------------------------------------------------------------------------
+  api:
+    image: node:20-alpine
+    container_name: api
+    working_dir: /app
+    command: sh -c "echo 'API Server Running' && tail -f /dev/null"
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      DATABASE_URL: postgres://${POSTGRES_USER:-app}:${POSTGRES_PASSWORD:-password}@db:5432/${POSTGRES_DB:-appdb}
+      REDIS_URL: redis://cache:6379
+    networks:
+      backend-net:
+        aliases:
+          - api-server
+          - app
+    depends_on:
+      - db
+      - cache
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # データベース（db-netのみ - 内部ネットワーク、外部アクセス不可）
+  # ---------------------------------------------------------------------------
+  db:
+    image: postgres:16-alpine
+    container_name: db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      POSTGRES_DB: ${POSTGRES_DB:-appdb}
+      TZ: ${TZ:-Asia/Tokyo}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - ./init-db:/docker-entrypoint-initdb.d:ro
+    networks:
+      db-net:
+        aliases:
+          - postgres
+          - database
+      backend-net:
+        aliases:
+          - db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-app}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # キャッシュサーバー（backend-netのみ）
+  # ---------------------------------------------------------------------------
+  cache:
+    image: redis:7-alpine
+    container_name: cache
+    command: redis-server --appendonly yes
+    volumes:
+      - cache-data:/data
+    networks:
+      backend-net:
+        aliases:
+          - redis
+          - session-store
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # 管理ツール（admin-netとdb-netに接続）
+  # ---------------------------------------------------------------------------
+  adminer:
+    image: adminer:latest
+    container_name: adminer
+    ports:
+      - "${ADMINER_PORT:-8081}:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: db
+    networks:
+      - admin-net
+      - db-net
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # 監視用（全ネットワークに接続）
+  # ---------------------------------------------------------------------------
+  monitoring:
+    image: alpine:latest
+    container_name: monitoring
+    command: sh -c "apk add --no-cache curl && tail -f /dev/null"
+    networks:
+      - frontend-net
+      - backend-net
+      - db-net
+      - admin-net
+    restart: unless-stopped
+
+# =============================================================================
+# ネットワーク定義
+# =============================================================================
 networks:
-  default:
-    external:
-      name: bridge
-  container-link:
-    name: docker.internal
+  # ---------------------------------------------------------------------------
+  # フロントエンドネットワーク（外部公開用）
+  # ---------------------------------------------------------------------------
+  frontend-net:
+    name: ${COMPOSE_PROJECT_NAME:-app}_frontend
     driver: bridge
     ipam:
       driver: default
       config:
-        - subnet: "172.20.100.0/24"
+        - subnet: "172.20.0.0/24"
+          gateway: "172.20.0.1"
+    driver_opts:
+      com.docker.network.bridge.name: "br-frontend"
 
+  # ---------------------------------------------------------------------------
+  # バックエンドネットワーク（アプリケーション層）
+  # ---------------------------------------------------------------------------
+  backend-net:
+    name: ${COMPOSE_PROJECT_NAME:-app}_backend
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: "172.21.0.0/24"
+          gateway: "172.21.0.1"
+    driver_opts:
+      com.docker.network.bridge.name: "br-backend"
+
+  # ---------------------------------------------------------------------------
+  # データベースネットワーク（内部のみ、外部アクセス不可）
+  # ---------------------------------------------------------------------------
+  db-net:
+    name: ${COMPOSE_PROJECT_NAME:-app}_database
+    driver: bridge
+    internal: true  # 外部アクセス禁止
+    ipam:
+      driver: default
+      config:
+        - subnet: "172.22.0.0/24"
+
+  # ---------------------------------------------------------------------------
+  # 管理ツール用ネットワーク
+  # ---------------------------------------------------------------------------
+  admin-net:
+    name: ${COMPOSE_PROJECT_NAME:-app}_admin
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: "172.23.0.0/24"
+
+# =============================================================================
+# ボリューム定義
+# =============================================================================
 volumes:
-  data-psql-volume:
-    name: data-psql
+  db-data:
+    name: ${COMPOSE_PROJECT_NAME:-app}_db_data
     driver: local
-  data-admin-volume:
-    name: data-admin
+  cache-data:
+    name: ${COMPOSE_PROJECT_NAME:-app}_cache_data
     driver: local
-
