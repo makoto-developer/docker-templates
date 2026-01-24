@@ -1,0 +1,18 @@
+FROM apache/superset:4.1.1
+
+USER root
+
+# Install build dependencies for mysqlclient
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    pkg-config \
+    default-libmysqlclient-dev \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install database drivers
+RUN pip install --no-cache-dir \
+    psycopg2-binary \
+    pymysql \
+    mysqlclient
+
+USER superset

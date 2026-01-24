@@ -1,0 +1,32 @@
+# Environment variables
+.env
+
+# Data directories
+data/
+
+# Superset data (if using bind mount)
+superset_data/
+
+# PostgreSQL data (if using bind mount)
+postgres_data/
+
+# Redis data (if using bind mount)
+redis_data/
+
+# Logs
+*.log
+logs/*
+!logs/.gitkeep
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.pyc
+*.pyo

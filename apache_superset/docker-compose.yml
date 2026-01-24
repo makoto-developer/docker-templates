@@ -1,0 +1,356 @@
+services:
+  superset:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: superset-custom:4.1.1
+    restart: unless-stopped
+    container_name: ${SUPERSET_CONTAINER_NAME}
+    hostname: ${SUPERSET_HOSTNAME}
+    depends_on:
+      superset_postgres:
+        condition: service_healthy
+      superset_redis:
+        condition: service_healthy
+
+    environment:
+      DATABASE_HOST: ${POSTGRES_CONTAINER_NAME}
+      DATABASE_PORT: 5432
+      DATABASE_DB: ${POSTGRES_DB}
+      DATABASE_USER: ${POSTGRES_USER}
+      DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
+      REDIS_HOST: ${REDIS_CONTAINER_NAME}
+      REDIS_PORT: 6379
+      SUPERSET_SECRET_KEY: ${SUPERSET_SECRET_KEY}
+      SUPERSET_LOAD_EXAMPLES: ${SUPERSET_LOAD_EXAMPLES}
+      SQLALCHEMY_DATABASE_URI: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_CONTAINER_NAME}:5432/${POSTGRES_DB}
+      REDIS_URL: redis://${REDIS_CONTAINER_NAME}:6379/0
+      CELERY_BROKER_URL: redis://${REDIS_CONTAINER_NAME}:6379/1
+      CELERY_RESULT_BACKEND: redis://${REDIS_CONTAINER_NAME}:6379/2
+      TZ: ${TZ}
+      LANG: ${LANG}
+
+    ports:
+      - ${SUPERSET_PORT}:8088
+
+    volumes:
+      - superset_home:/app/superset_home
+      - ./config/superset_config.py:/app/pythonpath/superset_config.py:ro
+      - ./logs/superset:/app/superset_home/logs
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8088/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+    deploy:
+      resources:
+        limits:
+          cpus: ${SUPERSET_CPU_LIMIT}
+          memory: ${SUPERSET_MEMORY_LIMIT}
+        reservations:
+          cpus: ${SUPERSET_CPU_RESERVATION}
+          memory: ${SUPERSET_MEMORY_RESERVATION}
+
+    logging:
+      driver: json-file
+      options:
+        max-size: 50m
+        max-file: "5"
+
+    networks:
+      - superset_network
+
+  superset_worker:
+    image: superset-custom:4.1.1
+    restart: unless-stopped
+    container_name: ${SUPERSET_WORKER_CONTAINER_NAME}
+    hostname: ${SUPERSET_WORKER_HOSTNAME}
+    command: ["celery", "--app=superset.tasks.celery_app:app", "worker", "--pool=prefork", "-O", "fair", "-c", "${CELERY_WORKER_CONCURRENCY}"]
+    depends_on:
+      superset_postgres:
+        condition: service_healthy
+      superset_redis:
+        condition: service_healthy
+
+    environment:
+      DATABASE_HOST: ${POSTGRES_CONTAINER_NAME}
+      DATABASE_PORT: 5432
+      DATABASE_DB: ${POSTGRES_DB}
+      DATABASE_USER: ${POSTGRES_USER}
+      DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
+      REDIS_HOST: ${REDIS_CONTAINER_NAME}
+      REDIS_PORT: 6379
+      SUPERSET_SECRET_KEY: ${SUPERSET_SECRET_KEY}
+      SQLALCHEMY_DATABASE_URI: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_CONTAINER_NAME}:5432/${POSTGRES_DB}
+      REDIS_URL: redis://${REDIS_CONTAINER_NAME}:6379/0
+      CELERY_BROKER_URL: redis://${REDIS_CONTAINER_NAME}:6379/1
+      CELERY_RESULT_BACKEND: redis://${REDIS_CONTAINER_NAME}:6379/2
+      TZ: ${TZ}
+      LANG: ${LANG}
+
+    volumes:
+      - superset_home:/app/superset_home
+      - ./config/superset_config.py:/app/pythonpath/superset_config.py:ro
+      - ./logs/superset:/app/superset_home/logs
+
+    deploy:
+      resources:
+        limits:
+          cpus: ${WORKER_CPU_LIMIT}
+          memory: ${WORKER_MEMORY_LIMIT}
+        reservations:
+          cpus: ${WORKER_CPU_RESERVATION}
+          memory: ${WORKER_MEMORY_RESERVATION}
+
+    logging:
+      driver: json-file
+      options:
+        max-size: 50m
+        max-file: "5"
+
+    networks:
+      - superset_network
+
+  superset_beat:
+    image: superset-custom:4.1.1
+    restart: unless-stopped
+    container_name: ${SUPERSET_BEAT_CONTAINER_NAME}
+    hostname: ${SUPERSET_BEAT_HOSTNAME}
+    command: ["celery", "--app=superset.tasks.celery_app:app", "beat", "--pidfile=/tmp/celerybeat.pid", "--schedule=/tmp/celerybeat-schedule"]
+    depends_on:
+      superset_postgres:
+        condition: service_healthy
+      superset_redis:
+        condition: service_healthy
+
+    environment:
+      DATABASE_HOST: ${POSTGRES_CONTAINER_NAME}
+      DATABASE_PORT: 5432
+      DATABASE_DB: ${POSTGRES_DB}
+      DATABASE_USER: ${POSTGRES_USER}
+      DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
+      REDIS_HOST: ${REDIS_CONTAINER_NAME}
+      REDIS_PORT: 6379
+      SUPERSET_SECRET_KEY: ${SUPERSET_SECRET_KEY}
+      SQLALCHEMY_DATABASE_URI: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_CONTAINER_NAME}:5432/${POSTGRES_DB}
+      REDIS_URL: redis://${REDIS_CONTAINER_NAME}:6379/0
+      CELERY_BROKER_URL: redis://${REDIS_CONTAINER_NAME}:6379/1
+      CELERY_RESULT_BACKEND: redis://${REDIS_CONTAINER_NAME}:6379/2
+      TZ: ${TZ}
+      LANG: ${LANG}
+
+    volumes:
+      - superset_home:/app/superset_home
+      - ./config/superset_config.py:/app/pythonpath/superset_config.py:ro
+      - ./logs/superset:/app/superset_home/logs
+
+    deploy:
+      resources:
+        limits:
+          cpus: ${BEAT_CPU_LIMIT}
+          memory: ${BEAT_MEMORY_LIMIT}
+        reservations:
+          cpus: ${BEAT_CPU_RESERVATION}
+          memory: ${BEAT_MEMORY_RESERVATION}
+
+    logging:
+      driver: json-file
+      options:
+        max-size: 50m
+        max-file: "5"
+
+    networks:
+      - superset_network
+
+  superset_postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    container_name: ${POSTGRES_CONTAINER_NAME}
+    hostname: ${POSTGRES_HOSTNAME}
+
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      TZ: ${TZ}
+      LANG: ${LANG}
+      LC_ALL: ${LC_ALL}
+      LC_CTYPE: ${LC_CTYPE}
+      LC_COLLATE: ${LC_COLLATE}
+      POSTGRES_INITDB_ARGS: ${POSTGRES_INITDB_ARGS}
+
+    ports:
+      - ${POSTGRES_PORT}:5432
+
+    volumes:
+      - superset_postgres_data:/var/lib/postgresql/data
+      - ./init:/docker-entrypoint-initdb.d:ro
+      - ./logs/postgres:/var/log/postgresql
+
+    shm_size: ${POSTGRES_SHM_SIZE}
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+    deploy:
+      resources:
+        limits:
+          cpus: ${POSTGRES_CPU_LIMIT}
+          memory: ${POSTGRES_MEMORY_LIMIT}
+        reservations:
+          cpus: ${POSTGRES_CPU_RESERVATION}
+          memory: ${POSTGRES_MEMORY_RESERVATION}
+
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+    networks:
+      - superset_network
+
+  superset_redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    container_name: ${REDIS_CONTAINER_NAME}
+    hostname: ${REDIS_HOSTNAME}
+    command: redis-server --appendonly yes
+
+    ports:
+      - ${REDIS_PORT}:6379
+
+    environment:
+      TZ: ${TZ}
+
+    volumes:
+      - superset_redis_data:/data
+
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+    deploy:
+      resources:
+        limits:
+          cpus: ${REDIS_CPU_LIMIT}
+          memory: ${REDIS_MEMORY_LIMIT}
+        reservations:
+          cpus: ${REDIS_CPU_RESERVATION}
+          memory: ${REDIS_MEMORY_RESERVATION}
+
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+    networks:
+      - superset_network
+
+  # Init container for first-time setup
+  superset_init:
+    image: superset-custom:4.1.1
+    container_name: ${SUPERSET_INIT_CONTAINER_NAME}
+    depends_on:
+      superset_postgres:
+        condition: service_healthy
+      superset_redis:
+        condition: service_healthy
+    command: >
+      bash -c "
+        superset db upgrade &&
+        superset fab create-admin --username ${SUPERSET_ADMIN_USERNAME} --firstname ${SUPERSET_ADMIN_FIRSTNAME} --lastname ${SUPERSET_ADMIN_LASTNAME} --email ${SUPERSET_ADMIN_EMAIL} --password ${SUPERSET_ADMIN_PASSWORD} &&
+        superset init
+      "
+
+    environment:
+      DATABASE_HOST: ${POSTGRES_CONTAINER_NAME}
+      DATABASE_PORT: 5432
+      DATABASE_DB: ${POSTGRES_DB}
+      DATABASE_USER: ${POSTGRES_USER}
+      DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
+      REDIS_HOST: ${REDIS_CONTAINER_NAME}
+      REDIS_PORT: 6379
+      SUPERSET_SECRET_KEY: ${SUPERSET_SECRET_KEY}
+      SQLALCHEMY_DATABASE_URI: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_CONTAINER_NAME}:5432/${POSTGRES_DB}
+      REDIS_URL: redis://${REDIS_CONTAINER_NAME}:6379/0
+      CELERY_BROKER_URL: redis://${REDIS_CONTAINER_NAME}:6379/1
+      CELERY_RESULT_BACKEND: redis://${REDIS_CONTAINER_NAME}:6379/2
+      TZ: ${TZ}
+      LANG: ${LANG}
+
+    volumes:
+      - superset_home:/app/superset_home
+      - ./config/superset_config.py:/app/pythonpath/superset_config.py:ro
+      - ./logs/superset:/app/superset_home/logs
+
+    networks:
+      - superset_network
+
+    profiles:
+      - init
+
+  # Sample MySQL database (simulating RDS replica)
+  sample_mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    container_name: sample_mysql
+    hostname: sample_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: online_shop
+      MYSQL_USER: shop_user
+      MYSQL_PASSWORD: shop_password
+      TZ: ${TZ}
+    ports:
+      - "23306:3306"
+    volumes:
+      - sample_mysql_data:/var/lib/mysql
+      - ./init/mysql:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+    networks:
+      - superset_network
+
+volumes:
+  superset_home:
+    driver: local
+
+  superset_postgres_data:
+    driver: local
+
+  superset_redis_data:
+    driver: local
+
+  sample_mysql_data:
+    driver: local
+
+networks:
+  superset_network:
+    name: ${NETWORK_NAME}
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: ${NETWORK_SUBNET}
+          gateway: ${NETWORK_GATEWAY}
