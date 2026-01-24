@@ -1,0 +1,24 @@
+# Environment variables
+.env
+
+# Data directories
+data/
+
+# Jira data (if using bind mount)
+jira_data/
+
+# PostgreSQL data (if using bind mount)
+postgres_data/
+
+# Logs
+*.log
+logs/*
+!logs/.gitkeep
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
