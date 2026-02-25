@@ -96,3 +96,11 @@ pgadmin-data/
 # ai
 .serena
 .claude
+
+# Claude Code - Track CLAUDE.md but ignore local files
+!CLAUDE.md
+!.claude/
+!.claude/rules/
+!.claude/rules/*.md
+CLAUDE.local.md
+.claude/*.local.md
